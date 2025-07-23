@@ -145,15 +145,15 @@ export default function POS() {
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
-      <div className="p-4 pb-2">
+      <div className="p-4 pb-0">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Kasir</h1>
         <p className="text-gray-600 text-sm">Proses transaksi penjualan dengan cepat</p>
       </div>
 
       {/* Products Section - Top */}
-      <div className="flex-1 p-4 pt-2 overflow-hidden">
+      <div className="flex-1 p-4 overflow-hidden">
         <Card className="h-full bg-white/80 backdrop-blur-sm border-0 rounded-2xl shadow-sm">
-          <CardHeader className="pb-3 pt-4">
+          <CardHeader className="pb-3">
             <CardTitle className="text-lg font-bold">Pilih Produk</CardTitle>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -166,16 +166,16 @@ export default function POS() {
             </div>
           </CardHeader>
           <CardContent className="h-full overflow-y-auto pb-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 hover:shadow-md cursor-pointer active:scale-95 transition-all duration-200 min-h-[140px] flex flex-col"
+                  className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 hover:shadow-md cursor-pointer active:scale-95 transition-all duration-200 min-h-[120px] flex flex-col"
                   onClick={() => addToCart(product)}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                      <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="p-1.5 bg-blue-100 rounded-lg flex-shrink-0">
+                      <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -184,13 +184,13 @@ export default function POS() {
                         />
                       </svg>
                     </div>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium flex-shrink-0">
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
                       Stok: {product.stock}
                     </span>
                   </div>
                   <div className="flex-1 flex flex-col justify-between min-w-0">
-                    <h3 className="font-bold text-gray-900 mb-2 text-sm leading-tight break-words">{product.name}</h3>
-                    <p className="text-lg font-bold text-emerald-600 break-words">
+                    <h3 className="font-bold text-gray-900 mb-1 text-sm line-clamp-2 leading-tight">{product.name}</h3>
+                    <p className="text-base font-bold text-emerald-600 truncate">
                       {formatCurrency(product.selling_price)}
                     </p>
                   </div>
@@ -201,32 +201,27 @@ export default function POS() {
         </Card>
       </div>
 
-      {/* Spacing between sections */}
-      <div className="h-4"></div>
-
       {/* Cart Section - Bottom */}
       <div className="p-4 pt-0 pb-24">
         <Card className="bg-white/90 backdrop-blur-sm border-0 rounded-2xl shadow-lg">
-          <CardHeader className="pb-3 pt-4">
+          <CardHeader className="pb-3">
             <CardTitle className="flex items-center text-lg font-bold">
-              <div className="p-2 bg-blue-100 rounded-xl mr-3">
-                <ShoppingCart className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-blue-100 rounded-xl mr-2">
+                <ShoppingCart className="h-4 w-4 text-blue-600" />
               </div>
               Keranjang ({cart.length})
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             {cart.length > 0 ? (
               <>
-                <div className="space-y-3 max-h-56 overflow-y-auto mb-4">
+                <div className="space-y-3 max-h-48 overflow-y-auto mb-4">
                   {cart.map((item) => (
-                    <div key={item.product.id} className="bg-gray-50 rounded-xl p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1 min-w-0 pr-3">
-                          <h4 className="font-bold text-gray-900 text-sm mb-1 break-words leading-tight">
-                            {item.product.name}
-                          </h4>
-                          <p className="text-xs text-gray-600 mb-1">
+                    <div key={item.product.id} className="bg-gray-50 rounded-xl p-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-gray-900 text-sm truncate mb-1">{item.product.name}</h4>
+                          <p className="text-xs text-gray-600">
                             {formatCurrency(item.product.selling_price)} × {item.quantity}
                           </p>
                           <p className="text-base font-bold text-emerald-600">
@@ -237,37 +232,37 @@ export default function POS() {
                           size="sm"
                           variant="outline"
                           onClick={() => removeFromCart(item.product.id)}
-                          className="text-red-600 hover:text-red-700 rounded-lg h-8 w-8 p-0 flex-shrink-0"
+                          className="text-red-600 hover:text-red-700 rounded-lg ml-2 h-8 w-8 p-0 flex-shrink-0"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
-                      <div className="flex items-center justify-center space-x-3">
+                      <div className="flex items-center justify-center space-x-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                          className="rounded-lg w-9 h-9 p-0"
+                          className="rounded-lg w-8 h-8 p-0"
                         >
-                          <Minus className="h-4 w-4" />
+                          <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="text-lg font-bold w-10 text-center">{item.quantity}</span>
+                        <span className="text-base font-bold w-8 text-center">{item.quantity}</span>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                           disabled={item.quantity >= item.product.stock}
-                          className="rounded-lg w-9 h-9 p-0"
+                          className="rounded-lg w-8 h-8 p-0"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 mb-4">
-                  <div className="flex justify-between text-xl font-bold mb-2">
+                <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-3 mb-4">
+                  <div className="flex justify-between text-lg font-bold mb-1">
                     <span>Total:</span>
                     <span className="text-emerald-600">{formatCurrency(calculateTotal())}</span>
                   </div>
@@ -280,19 +275,19 @@ export default function POS() {
                 <Button
                   onClick={processTransaction}
                   disabled={isProcessing}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl py-4 text-lg font-bold shadow-sm"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl py-3 text-base font-bold shadow-sm"
                 >
-                  <Calculator className="h-5 w-5 mr-2" />
+                  <Calculator className="h-4 w-4 mr-2" />
                   {isProcessing ? "Memproses..." : "Proses Transaksi"}
                 </Button>
               </>
             ) : (
               <div className="text-center py-8">
-                <div className="p-4 bg-gray-100 rounded-xl inline-block mb-4">
-                  <ShoppingCart className="h-10 w-10 text-gray-400" />
+                <div className="p-3 bg-gray-100 rounded-xl inline-block mb-3">
+                  <ShoppingCart className="h-8 w-8 text-gray-400" />
                 </div>
-                <p className="text-gray-600 text-base font-medium">Keranjang kosong</p>
-                <p className="text-sm text-gray-500 mt-1">Pilih produk untuk memulai transaksi</p>
+                <p className="text-gray-600 text-sm">Keranjang kosong</p>
+                <p className="text-xs text-gray-500 mt-1">Pilih produk untuk memulai transaksi</p>
               </div>
             )}
           </CardContent>
