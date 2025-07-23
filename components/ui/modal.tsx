@@ -18,13 +18,15 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
-      const bottomNav = document.querySelector('[class*="bottom-0"]')
+      // Hide bottom navigation
+      const bottomNav = document.querySelector('[data-bottom-nav="true"]')
       if (bottomNav) {
         ;(bottomNav as HTMLElement).style.display = "none"
       }
     } else {
       document.body.style.overflow = "unset"
-      const bottomNav = document.querySelector('[class*="bottom-0"]')
+      // Show bottom navigation
+      const bottomNav = document.querySelector('[data-bottom-nav="true"]')
       if (bottomNav) {
         ;(bottomNav as HTMLElement).style.display = "block"
       }
@@ -32,7 +34,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
 
     return () => {
       document.body.style.overflow = "unset"
-      const bottomNav = document.querySelector('[class*="bottom-0"]')
+      const bottomNav = document.querySelector('[data-bottom-nav="true"]')
       if (bottomNav) {
         ;(bottomNav as HTMLElement).style.display = "block"
       }
@@ -54,13 +56,20 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} style={{ zIndex: -1 }} />
+
+      {/* Modal Content */}
       <div
-        className={`relative w-full ${sizeClasses[size]} bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border-0 max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 duration-300`}
+        className={`relative w-full ${sizeClasses[size]} bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border-0 max-h-[90vh] sm:max-h-[85vh] overflow-hidden`}
+        style={{
+          transform: isOpen ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.3s ease-out",
+        }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 bg-white sticky top-0 z-10">
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
           <Button
             variant="ghost"
@@ -73,7 +82,9 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)] sm:max-h-[calc(85vh-80px)]">{children}</div>
+        <div className="p-6 overflow-y-auto" style={{ maxHeight: "calc(90vh - 80px)" }}>
+          {children}
+        </div>
       </div>
     </div>
   )

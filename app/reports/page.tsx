@@ -167,6 +167,15 @@ export default function Reports() {
     }).format(amount)
   }
 
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + "M"
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(0) + "K"
+    }
+    return num.toString()
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("id-ID", {
       day: "numeric",
@@ -177,27 +186,27 @@ export default function Reports() {
 
   if (isLoading) {
     return (
-      <div className="p-4 pt-8">
+      <div className="p-4 pt-8 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-3xl"></div>
+              <div key={i} className="h-28 bg-gray-200 rounded-2xl"></div>
             ))}
           </div>
-          <div className="h-64 bg-gray-200 rounded-3xl"></div>
+          <div className="h-64 bg-gray-200 rounded-2xl"></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-4 pt-8 pb-24 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
+    <div className="p-4 pt-8 pb-24 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Laporan Keuangan</h1>
-          <p className="text-gray-600">Analisis performa bisnis Anda</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Laporan Keuangan</h1>
+          <p className="text-gray-600 text-sm">Analisis performa bisnis Anda</p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-full sm:w-48 rounded-2xl h-12">
@@ -212,12 +221,12 @@ export default function Reports() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <Card className="bg-gradient-to-br from-emerald-400 to-emerald-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -228,18 +237,18 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Total Omzet</p>
-              <p className="text-2xl font-bold">{formatCurrency(summary.totalRevenue)}</p>
-              <p className="text-xs opacity-75 mt-1">{summary.totalTransactions} transaksi</p>
+              <p className="text-xs opacity-90 mb-1">Total Omzet</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(summary.totalRevenue)}</p>
+              <p className="text-xs opacity-75">{summary.totalTransactions} transaksi</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-500 to-amber-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-amber-400 to-orange-400 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -250,18 +259,18 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Piutang</p>
-              <p className="text-2xl font-bold">{formatCurrency(summary.totalReceivables)}</p>
-              <p className="text-xs opacity-75 mt-1">Belum dibayar</p>
+              <p className="text-xs opacity-90 mb-1">Piutang</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(summary.totalReceivables)}</p>
+              <p className="text-xs opacity-75">Belum dibayar</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-blue-400 to-blue-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -272,18 +281,18 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Laba Kotor</p>
-              <p className="text-2xl font-bold">{formatCurrency(summary.totalProfit)}</p>
-              <p className="text-xs opacity-75 mt-1">Sebelum pengeluaran</p>
+              <p className="text-xs opacity-90 mb-1">Laba Kotor</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(summary.totalProfit)}</p>
+              <p className="text-xs opacity-75">Sebelum pengeluaran</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-purple-400 to-purple-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -294,18 +303,18 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">HPP (Restock)</p>
-              <p className="text-2xl font-bold">{formatCurrency(summary.totalHPP)}</p>
-              <p className="text-xs opacity-75 mt-1">Harga Pokok Penjualan</p>
+              <p className="text-xs opacity-90 mb-1">HPP (Restock)</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(summary.totalHPP)}</p>
+              <p className="text-xs opacity-75">Harga Pokok Penjualan</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-500 to-red-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-red-400 to-red-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -316,18 +325,18 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Biaya Operasional</p>
-              <p className="text-2xl font-bold">{formatCurrency(summary.totalOperationalExpenses)}</p>
-              <p className="text-xs opacity-75 mt-1">Listrik, plastik, dll</p>
+              <p className="text-xs opacity-90 mb-1">Biaya Operasional</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(summary.totalOperationalExpenses)}</p>
+              <p className="text-xs opacity-75">Listrik, plastik, dll</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-orange-400 to-orange-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -338,20 +347,20 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Total Pengeluaran</p>
-              <p className="text-2xl font-bold">
-                {formatCurrency(summary.totalHPP + summary.totalOperationalExpenses)}
+              <p className="text-xs opacity-90 mb-1">Total Pengeluaran</p>
+              <p className="text-lg font-bold truncate">
+                Rp {formatNumber(summary.totalHPP + summary.totalOperationalExpenses)}
               </p>
-              <p className="text-xs opacity-75 mt-1">HPP + Operasional</p>
+              <p className="text-xs opacity-75">HPP + Operasional</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-indigo-400 to-indigo-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -362,20 +371,20 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Laba Bersih</p>
-              <p className={`text-2xl font-bold ${summary.netProfit >= 0 ? "text-white" : "text-red-200"}`}>
-                {formatCurrency(summary.netProfit)}
+              <p className="text-xs opacity-90 mb-1">Laba Bersih</p>
+              <p className={`text-lg font-bold truncate ${summary.netProfit >= 0 ? "text-white" : "text-red-200"}`}>
+                Rp {formatNumber(summary.netProfit)}
               </p>
-              <p className="text-xs opacity-75 mt-1">Laba setelah pengeluaran</p>
+              <p className="text-xs opacity-75">Laba setelah pengeluaran</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-teal-500 to-teal-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-teal-400 to-teal-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -386,16 +395,18 @@ export default function Reports() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Total Kas</p>
-              <p className="text-2xl font-bold">{formatCurrency(summary.totalRevenue + summary.totalReceivables)}</p>
-              <p className="text-xs opacity-75 mt-1">Omzet + Piutang</p>
+              <p className="text-xs opacity-90 mb-1">Total Kas</p>
+              <p className="text-lg font-bold truncate">
+                Rp {formatNumber(summary.totalRevenue + summary.totalReceivables)}
+              </p>
+              <p className="text-xs opacity-75">Omzet + Piutang</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Daily Report */}
-      <Card className="bg-white/80 backdrop-blur-sm border-0 rounded-3xl shadow-lg">
+      <Card className="bg-white/80 backdrop-blur-sm border-0 rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="text-xl font-bold">Laporan Harian</CardTitle>
         </CardHeader>
@@ -403,49 +414,53 @@ export default function Reports() {
           <div className="space-y-4">
             {reportData.length > 0 ? (
               reportData.map((day) => (
-                <div key={day.date} className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                <div key={day.date} className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
                     <h3 className="text-lg font-bold text-gray-900">{formatDate(day.date)}</h3>
                     <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
                       {day.transactions} transaksi
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">Omzet</p>
-                      <p className="font-bold text-emerald-600">{formatCurrency(day.revenue)}</p>
+                      <p className="font-bold text-emerald-600 text-sm">Rp {formatNumber(day.revenue)}</p>
                     </div>
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">Piutang</p>
-                      <p className="font-bold text-amber-600">{formatCurrency(day.receivables)}</p>
+                      <p className="font-bold text-amber-600 text-sm">Rp {formatNumber(day.receivables)}</p>
                     </div>
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">Laba Kotor</p>
-                      <p className="font-bold text-blue-600">{formatCurrency(day.profit)}</p>
+                      <p className="font-bold text-blue-600 text-sm">Rp {formatNumber(day.profit)}</p>
                     </div>
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">HPP</p>
-                      <p className="font-bold text-purple-600">{formatCurrency(day.hpp)}</p>
+                      <p className="font-bold text-purple-600 text-sm">Rp {formatNumber(day.hpp)}</p>
                     </div>
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">Biaya Operasional</p>
-                      <p className="font-bold text-red-600">{formatCurrency(day.operationalExpenses)}</p>
+                      <p className="font-bold text-red-600 text-sm">Rp {formatNumber(day.operationalExpenses)}</p>
                     </div>
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">Total Pengeluaran</p>
-                      <p className="font-bold text-orange-600">{formatCurrency(day.hpp + day.operationalExpenses)}</p>
+                      <p className="font-bold text-orange-600 text-sm">
+                        Rp {formatNumber(day.hpp + day.operationalExpenses)}
+                      </p>
                     </div>
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">Laba Bersih</p>
                       <p
-                        className={`font-bold ${(day.profit - day.operationalExpenses) >= 0 ? "text-indigo-600" : "text-red-600"}`}
+                        className={`font-bold text-sm ${(day.profit - day.operationalExpenses) >= 0 ? "text-indigo-600" : "text-red-600"}`}
                       >
-                        {formatCurrency(day.profit - day.operationalExpenses)}
+                        Rp {formatNumber(day.profit - day.operationalExpenses)}
                       </p>
                     </div>
                     <div className="bg-white rounded-xl p-3">
                       <p className="text-xs text-gray-600 mb-1">Total Kas</p>
-                      <p className="font-bold text-teal-600">{formatCurrency(day.revenue + day.receivables)}</p>
+                      <p className="font-bold text-teal-600 text-sm">
+                        Rp {formatNumber(day.revenue + day.receivables)}
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -170,11 +170,11 @@ export default function POS() {
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 hover:shadow-md cursor-pointer active:scale-95 transition-all duration-200"
+                  className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 hover:shadow-md cursor-pointer active:scale-95 transition-all duration-200 min-h-[120px] flex flex-col"
                   onClick={() => addToCart(product)}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <div className="p-1.5 bg-blue-100 rounded-lg flex-shrink-0">
                       <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
@@ -184,12 +184,16 @@ export default function POS() {
                         />
                       </svg>
                     </div>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
                       Stok: {product.stock}
                     </span>
                   </div>
-                  <h3 className="font-bold text-gray-900 mb-1 text-sm truncate">{product.name}</h3>
-                  <p className="text-lg font-bold text-emerald-600">{formatCurrency(product.selling_price)}</p>
+                  <div className="flex-1 flex flex-col justify-between min-w-0">
+                    <h3 className="font-bold text-gray-900 mb-1 text-sm line-clamp-2 leading-tight">{product.name}</h3>
+                    <p className="text-base font-bold text-emerald-600 truncate">
+                      {formatCurrency(product.selling_price)}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -228,7 +232,7 @@ export default function POS() {
                           size="sm"
                           variant="outline"
                           onClick={() => removeFromCart(item.product.id)}
-                          className="text-red-600 hover:text-red-700 rounded-lg ml-2 h-8 w-8 p-0"
+                          className="text-red-600 hover:text-red-700 rounded-lg ml-2 h-8 w-8 p-0 flex-shrink-0"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
