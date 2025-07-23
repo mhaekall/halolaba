@@ -18,14 +18,12 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
-      // Hide bottom navigation
       const bottomNav = document.querySelector('[class*="bottom-0"]')
       if (bottomNav) {
         ;(bottomNav as HTMLElement).style.display = "none"
       }
     } else {
       document.body.style.overflow = "unset"
-      // Show bottom navigation
       const bottomNav = document.querySelector('[class*="bottom-0"]')
       if (bottomNav) {
         ;(bottomNav as HTMLElement).style.display = "block"
@@ -56,23 +54,26 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
       <div
-        className={`relative w-full ${sizeClasses[size]} bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 max-h-[90vh] overflow-hidden`}
+        className={`relative w-full ${sizeClasses[size]} bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border-0 max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 duration-300`}
       >
-        <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClose}
-            className="rounded-full h-8 w-8 p-0 hover:bg-gray-100"
+            className="rounded-full h-10 w-10 p-0 hover:bg-gray-100"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">{children}</div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)] sm:max-h-[calc(85vh-80px)]">{children}</div>
       </div>
     </div>
   )

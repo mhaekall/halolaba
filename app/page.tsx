@@ -31,15 +31,12 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      // Get total products
       const { count: totalProducts } = await supabase.from("products").select("*", { count: "exact", head: true })
 
-      // Get low stock products (stock <= minimal_stock)
       const { data: products } = await supabase.from("products").select("stock, minimal_stock")
       const lowStockProducts = products?.filter((p) => p.stock <= p.minimal_stock).length || 0
       const criticalStockProducts = products?.filter((p) => p.stock < p.minimal_stock / 2).length || 0
 
-      // Get today's revenue and profit
       const today = new Date().toISOString().split("T")[0]
       const { data: todayTransactions } = await supabase
         .from("transactions")
@@ -50,15 +47,12 @@ export default function Dashboard() {
       const todayRevenue = todayTransactions?.reduce((sum, t) => sum + t.total_amount, 0) || 0
       const todayProfit = todayTransactions?.reduce((sum, t) => sum + t.profit, 0) || 0
 
-      // Get unpaid debts
       const { data: unpaidDebts } = await supabase.from("debts").select("amount").eq("status", "unpaid")
       const totalUnpaidDebts = unpaidDebts?.reduce((sum, d) => sum + d.amount, 0) || 0
 
-      // Get operational expenses
       const { data: operationalExpenses } = await supabase.from("operational_expenses").select("amount")
       const totalOperationalExpenses = operationalExpenses?.reduce((sum, e) => sum + e.amount, 0) || 0
 
-      // Get restock expenses
       const { data: restockTransactions } = await supabase.from("restock_transactions").select("total_amount")
       const totalRestockExpenses = restockTransactions?.reduce((sum, r) => sum + r.total_amount, 0) || 0
 
@@ -85,7 +79,7 @@ export default function Dashboard() {
         .select("name, stock, minimal_stock")
         .lte("stock", 10)
         .order("stock", { ascending: true })
-        .limit(10)
+        .limit(6)
 
       setLowStockItems(data || [])
     } catch (error) {
@@ -130,7 +124,7 @@ export default function Dashboard() {
 
         const sortedProducts = Object.values(productSales).sort((a, b) => b.totalSold - a.totalSold)
 
-        setTopProducts(sortedProducts.slice(0, 5))
+        setTopProducts(sortedProducts.slice(0, 3))
         setSlowProducts(sortedProducts.slice(-3).reverse())
       }
     } catch (error) {
@@ -146,19 +140,28 @@ export default function Dashboard() {
     }).format(amount)
   }
 
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + "M"
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(0) + "K"
+    }
+    return num.toString()
+  }
+
   if (isLoading) {
     return (
-      <div className="p-4 pt-8">
+      <div className="p-4 pt-8 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
         <div className="animate-pulse">
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-3xl"></div>
+              <div key={i} className="h-28 bg-gray-200 rounded-2xl"></div>
             ))}
           </div>
-          <div className="h-40 bg-gray-200 rounded-3xl mb-6"></div>
+          <div className="h-32 bg-gray-200 rounded-2xl mb-6"></div>
           <div className="grid grid-cols-2 gap-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-3xl"></div>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-20 bg-gray-200 rounded-2xl"></div>
             ))}
           </div>
         </div>
@@ -169,20 +172,20 @@ export default function Dashboard() {
   const netProfit = stats.todayProfit - stats.totalOperationalExpenses
 
   return (
-    <div className="p-4 pt-8 pb-24 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
+    <div className="p-4 pt-8 pb-24 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Selamat datang kembali! Berikut ringkasan bisnis Anda hari ini.</p>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Dashboard</h1>
+        <p className="text-gray-600 text-sm">Selamat datang kembali! Berikut ringkasan bisnis Anda hari ini.</p>
       </div>
 
       {/* Main Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <Card className="bg-gradient-to-br from-emerald-400 to-emerald-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -193,18 +196,18 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Omzet Hari Ini</p>
-              <p className="text-2xl font-bold">{formatCurrency(stats.todayRevenue)}</p>
-              <p className="text-xs opacity-75 mt-1">{stats.todayTransactions} transaksi</p>
+              <p className="text-xs opacity-90 mb-1">Omzet Hari Ini</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(stats.todayRevenue)}</p>
+              <p className="text-xs opacity-75">{stats.todayTransactions} transaksi</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-blue-400 to-blue-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -215,18 +218,18 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Laba Kotor</p>
-              <p className="text-2xl font-bold">{formatCurrency(stats.todayProfit)}</p>
-              <p className="text-xs opacity-75 mt-1">Sebelum pengeluaran</p>
+              <p className="text-xs opacity-90 mb-1">Laba Kotor</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(stats.todayProfit)}</p>
+              <p className="text-xs opacity-75">Sebelum pengeluaran</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-500 to-red-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-orange-400 to-red-400 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -237,18 +240,18 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Total Pengeluaran</p>
-              <p className="text-2xl font-bold">{formatCurrency(stats.totalOperationalExpenses)}</p>
-              <p className="text-xs opacity-75 mt-1">Biaya operasional</p>
+              <p className="text-xs opacity-90 mb-1">Total Pengeluaran</p>
+              <p className="text-lg font-bold truncate">Rp {formatNumber(stats.totalOperationalExpenses)}</p>
+              <p className="text-xs opacity-75">Biaya operasional</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 border-0 text-white rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-2xl">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="bg-gradient-to-br from-purple-400 to-purple-500 border-0 text-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -259,11 +262,11 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <p className="text-sm opacity-90 mb-1">Laba Bersih</p>
-              <p className={`text-2xl font-bold ${netProfit >= 0 ? "text-white" : "text-red-200"}`}>
-                {formatCurrency(netProfit)}
+              <p className="text-xs opacity-90 mb-1">Laba Bersih</p>
+              <p className={`text-lg font-bold truncate ${netProfit >= 0 ? "text-white" : "text-red-200"}`}>
+                Rp {formatNumber(netProfit)}
               </p>
-              <p className="text-xs opacity-75 mt-1">Laba setelah pengeluaran</p>
+              <p className="text-xs opacity-75">Laba setelah pengeluaran</p>
             </div>
           </CardContent>
         </Card>
@@ -271,11 +274,11 @@ export default function Dashboard() {
 
       {/* Stock Alert */}
       {lowStockItems.length > 0 && (
-        <Card className="mb-8 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 rounded-3xl shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-orange-100 rounded-2xl">
-                <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="mb-6 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 rounded-2xl shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-2 bg-orange-100 rounded-xl">
+                <svg className="h-5 w-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -285,30 +288,30 @@ export default function Dashboard() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-orange-800">Peringatan Stok</h3>
-                <p className="text-orange-700 text-sm">{lowStockItems.length} produk memerlukan perhatian</p>
+                <h3 className="font-bold text-orange-800 text-sm">Peringatan Stok</h3>
+                <p className="text-orange-700 text-xs">{lowStockItems.length} produk memerlukan perhatian</p>
               </div>
             </div>
-            <div className="space-y-3">
-              {lowStockItems.slice(0, 3).map((item, index) => {
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {lowStockItems.map((item, index) => {
                 const isVeryLow = item.stock <= item.minimal_stock
                 const isCritical = item.stock < item.minimal_stock / 2
 
                 return (
-                  <div key={index} className="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm">
-                    <div className="flex items-center gap-3">
+                  <div key={index} className="flex justify-between items-center p-3 bg-white rounded-xl shadow-sm">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
                       <div
-                        className={`w-3 h-3 rounded-full ${isCritical ? "bg-red-500" : isVeryLow ? "bg-orange-500" : "bg-yellow-500"}`}
+                        className={`w-2 h-2 rounded-full flex-shrink-0 ${isCritical ? "bg-red-500" : isVeryLow ? "bg-orange-500" : "bg-yellow-500"}`}
                       />
-                      <span className="font-medium text-gray-900">{item.name}</span>
+                      <span className="font-medium text-gray-900 text-sm truncate">{item.name}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <span
-                        className={`font-bold ${isCritical ? "text-red-600" : isVeryLow ? "text-orange-600" : "text-yellow-600"}`}
+                        className={`font-bold text-sm ${isCritical ? "text-red-600" : isVeryLow ? "text-orange-600" : "text-yellow-600"}`}
                       >
                         {item.stock}
                       </span>
-                      <span className="text-gray-500 text-sm">/{item.minimal_stock}</span>
+                      <span className="text-gray-500 text-xs">/{item.minimal_stock}</span>
                     </div>
                   </div>
                 )
@@ -319,16 +322,16 @@ export default function Dashboard() {
       )}
 
       {/* Quick Actions */}
-      <Card className="bg-white/80 backdrop-blur-sm border-0 rounded-3xl shadow-lg mb-8">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Aksi Cepat</h3>
-          <div className="grid grid-cols-2 gap-4">
+      <Card className="bg-white/80 backdrop-blur-sm border-0 rounded-2xl shadow-sm mb-6">
+        <CardContent className="p-4">
+          <h3 className="font-bold text-gray-900 mb-3 text-sm">Aksi Cepat</h3>
+          <div className="grid grid-cols-2 gap-3">
             <EnhancedButton
               onClick={() => router.push("/inventory")}
-              className="p-6 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl text-white h-auto flex flex-col items-center shadow-lg"
+              className="p-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-2xl text-white h-auto flex flex-col items-center shadow-sm"
             >
-              <div className="p-3 bg-white/20 rounded-2xl mb-3">
-                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-white/20 rounded-xl mb-2">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -337,29 +340,29 @@ export default function Dashboard() {
                   />
                 </svg>
               </div>
-              <p className="font-bold text-sm">Kelola Stok</p>
+              <p className="font-bold text-xs">Kelola Stok</p>
               <p className="text-xs opacity-75 text-center">Inventaris produk</p>
             </EnhancedButton>
 
             <EnhancedButton
               onClick={() => router.push("/operational")}
-              className="p-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl text-white h-auto flex flex-col items-center shadow-lg"
+              className="p-4 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl text-white h-auto flex flex-col items-center shadow-sm"
             >
-              <div className="p-3 bg-white/20 rounded-2xl mb-3">
-                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-white/20 rounded-xl mb-2">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <p className="font-bold text-sm">Biaya Operasional</p>
+              <p className="font-bold text-xs">Biaya Operasional</p>
               <p className="text-xs opacity-75 text-center">Catat pengeluaran</p>
             </EnhancedButton>
 
             <EnhancedButton
               onClick={() => router.push("/debts")}
-              className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl text-white h-auto flex flex-col items-center shadow-lg"
+              className="p-4 bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl text-white h-auto flex flex-col items-center shadow-sm"
             >
-              <div className="p-3 bg-white/20 rounded-2xl mb-3">
-                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-white/20 rounded-xl mb-2">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -368,16 +371,16 @@ export default function Dashboard() {
                   />
                 </svg>
               </div>
-              <p className="font-bold text-sm">Piutang</p>
+              <p className="font-bold text-xs">Piutang</p>
               <p className="text-xs opacity-75 text-center">Kelola kasbon</p>
             </EnhancedButton>
 
             <EnhancedButton
               onClick={() => router.push("/restock")}
-              className="p-6 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-3xl text-white h-auto flex flex-col items-center shadow-lg"
+              className="p-4 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-2xl text-white h-auto flex flex-col items-center shadow-sm"
             >
-              <div className="p-3 bg-white/20 rounded-2xl mb-3">
-                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-white/20 rounded-xl mb-2">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -386,7 +389,7 @@ export default function Dashboard() {
                   />
                 </svg>
               </div>
-              <p className="font-bold text-sm">Restock Barang</p>
+              <p className="font-bold text-xs">Restock Barang</p>
               <p className="text-xs opacity-75 text-center">Belanja stok (HPP)</p>
             </EnhancedButton>
           </div>
@@ -395,14 +398,14 @@ export default function Dashboard() {
 
       {/* Product Analytics */}
       {(topProducts.length > 0 || slowProducts.length > 0) && (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="space-y-4">
           {/* Top Products */}
           {topProducts.length > 0 && (
-            <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 rounded-3xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 bg-emerald-100 rounded-2xl">
-                    <svg className="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 rounded-2xl shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-2 bg-emerald-100 rounded-xl">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -412,20 +415,22 @@ export default function Dashboard() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-emerald-800">Produk Terlaris</h3>
-                    <p className="text-emerald-700 text-sm">30 hari terakhir</p>
+                    <h3 className="font-bold text-emerald-800 text-sm">Produk Terlaris</h3>
+                    <p className="text-emerald-700 text-xs">30 hari terakhir</p>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  {topProducts.slice(0, 3).map((product, index) => (
-                    <div key={index} className="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                          <span className="text-emerald-600 font-bold text-sm">#{index + 1}</span>
+                <div className="space-y-2">
+                  {topProducts.map((product, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-white rounded-xl shadow-sm">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-emerald-600 font-bold text-xs">#{index + 1}</span>
                         </div>
-                        <span className="font-medium text-gray-900">{product.name}</span>
+                        <span className="font-medium text-gray-900 text-sm truncate">{product.name}</span>
                       </div>
-                      <span className="text-emerald-600 font-bold">{product.totalSold} terjual</span>
+                      <span className="text-emerald-600 font-bold text-sm flex-shrink-0">
+                        {product.totalSold} terjual
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -435,11 +440,11 @@ export default function Dashboard() {
 
           {/* Slow Products */}
           {slowProducts.length > 0 && (
-            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 rounded-3xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 bg-amber-100 rounded-2xl">
-                    <svg className="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 rounded-2xl shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-2 bg-amber-100 rounded-xl">
+                    <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -449,15 +454,17 @@ export default function Dashboard() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-amber-800">Produk Kurang Laku</h3>
-                    <p className="text-amber-700 text-sm">Perlu perhatian khusus</p>
+                    <h3 className="font-bold text-amber-800 text-sm">Produk Kurang Laku</h3>
+                    <p className="text-amber-700 text-xs">Perlu perhatian khusus</p>
                   </div>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {slowProducts.map((product, index) => (
-                    <div key={index} className="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm">
-                      <span className="font-medium text-gray-900">{product.name}</span>
-                      <span className="text-amber-600 font-bold">{product.totalSold} terjual</span>
+                    <div key={index} className="flex justify-between items-center p-3 bg-white rounded-xl shadow-sm">
+                      <span className="font-medium text-gray-900 text-sm truncate flex-1 min-w-0">{product.name}</span>
+                      <span className="text-amber-600 font-bold text-sm flex-shrink-0">
+                        {product.totalSold} terjual
+                      </span>
                     </div>
                   ))}
                 </div>
