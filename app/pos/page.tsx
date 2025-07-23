@@ -164,6 +164,11 @@ export default function POS() {
     playClickSound("light")
   }
 
+  const getProductQuantityInCart = (productId: string) => {
+    const cartItem = cart.find((item) => item.product.id === productId)
+    return cartItem ? cartItem.quantity : 0
+  }
+
   // Step 1: Product Selection
   if (currentStep === "products") {
     return (
@@ -221,33 +226,47 @@ export default function POS() {
         {/* Products Grid */}
         <div className="flex-1 p-4 pt-2 overflow-y-auto">
           <div className="grid grid-cols-2 gap-4 pb-4">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white border border-gray-200 rounded-2xl p-4 hover:shadow-lg cursor-pointer active:scale-95 transition-all duration-200 min-h-[160px] flex flex-col"
-                onClick={() => addToCart(product)}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 bg-emerald-100 rounded-xl flex-shrink-0">
-                    <svg className="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                      />
-                    </svg>
+            {filteredProducts.map((product) => {
+              const quantityInCart = getProductQuantityInCart(product.id)
+
+              return (
+                <div
+                  key={product.id}
+                  className="bg-white border border-gray-200 rounded-2xl p-4 hover:shadow-lg cursor-pointer active:scale-95 transition-all duration-200 min-h-[160px] flex flex-col relative"
+                  onClick={() => addToCart(product)}
+                >
+                  {/* Quantity Badge */}
+                  {quantityInCart > 0 && (
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center z-10">
+                      {quantityInCart}
+                    </div>
+                  )}
+
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="p-2 bg-emerald-100 rounded-xl flex-shrink-0">
+                      <svg className="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
+                      </svg>
+                    </div>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                      Stok: {product.stock}
+                    </span>
                   </div>
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
-                    Stok: {product.stock}
-                  </span>
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-bold text-gray-900 mb-1 text-sm leading-tight break-words">{product.name}</h3>
+                      {product.category && <p className="text-xs text-gray-500 mb-2">{product.category}</p>}
+                    </div>
+                    <p className="text-lg font-bold text-emerald-600">{formatCurrency(product.selling_price)}</p>
+                  </div>
                 </div>
-                <div className="flex-1 flex flex-col justify-between">
-                  <h3 className="font-bold text-gray-900 mb-2 text-sm leading-tight break-words">{product.name}</h3>
-                  <p className="text-lg font-bold text-emerald-600">{formatCurrency(product.selling_price)}</p>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 

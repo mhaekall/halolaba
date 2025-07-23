@@ -7,9 +7,25 @@ import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Modal } from "@/components/ui/modal"
 import { Plus, Edit, Trash2, Package, Search, AlertTriangle } from "lucide-react"
 import { useConfirmationStore, useToastStore } from "@/lib/confirmation-service"
+
+const PRODUCT_CATEGORIES = [
+  "Makanan & Minuman",
+  "Sembako",
+  "Snack & Permen",
+  "Rokok & Tembakau",
+  "Peralatan Rumah Tangga",
+  "Kosmetik & Perawatan",
+  "Obat-obatan",
+  "Alat Tulis",
+  "Elektronik",
+  "Pakaian",
+  "Mainan",
+  "Lainnya",
+]
 
 export default function Inventory() {
   const [products, setProducts] = useState<Product[]>([])
@@ -19,6 +35,7 @@ export default function Inventory() {
   const [isLoading, setIsLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: "",
+    category: "",
     stock: "",
     minimal_stock: "",
     cost_price: "",
@@ -47,6 +64,7 @@ export default function Inventory() {
 
     const productData = {
       name: formData.name,
+      category: formData.category || "Lainnya",
       stock: Number.parseInt(formData.stock),
       minimal_stock: Number.parseInt(formData.minimal_stock),
       cost_price: Number.parseFloat(formData.cost_price),
@@ -78,13 +96,14 @@ export default function Inventory() {
     }
 
     setIsModalOpen(false)
-    setFormData({ name: "", stock: "", minimal_stock: "", cost_price: "", selling_price: "" })
+    setFormData({ name: "", category: "", stock: "", minimal_stock: "", cost_price: "", selling_price: "" })
   }
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product)
     setFormData({
       name: product.name,
+      category: product.category || "",
       stock: product.stock.toString(),
       minimal_stock: product.minimal_stock.toString(),
       cost_price: product.cost_price.toString(),
@@ -208,6 +227,7 @@ export default function Inventory() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
+                        {product.category && <p className="text-xs text-gray-500 mt-1">{product.category}</p>}
                         <div className="flex items-center gap-2 mt-1">
                           <span
                             className={`text-sm font-bold ${
@@ -285,7 +305,7 @@ export default function Inventory() {
         onClose={() => {
           setIsModalOpen(false)
           setEditingProduct(null)
-          setFormData({ name: "", stock: "", minimal_stock: "", cost_price: "", selling_price: "" })
+          setFormData({ name: "", category: "", stock: "", minimal_stock: "", cost_price: "", selling_price: "" })
         }}
         title={editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
         size="lg"
@@ -303,6 +323,24 @@ export default function Inventory() {
               className="mt-2 rounded-2xl h-12"
               required
             />
+          </div>
+
+          <div>
+            <Label htmlFor="category" className="text-sm font-medium text-gray-700">
+              Kategori Produk
+            </Label>
+            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+              <SelectTrigger className="mt-2 rounded-2xl h-12">
+                <SelectValue placeholder="Pilih kategori produk" />
+              </SelectTrigger>
+              <SelectContent>
+                {PRODUCT_CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -405,7 +443,7 @@ export default function Inventory() {
               onClick={() => {
                 setIsModalOpen(false)
                 setEditingProduct(null)
-                setFormData({ name: "", stock: "", minimal_stock: "", cost_price: "", selling_price: "" })
+                setFormData({ name: "", category: "", stock: "", minimal_stock: "", cost_price: "", selling_price: "" })
               }}
               className="flex-1 rounded-2xl py-3"
             >

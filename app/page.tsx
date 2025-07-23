@@ -24,9 +24,12 @@ export default function Dashboard() {
   const [lowStockItems, setLowStockItems] = useState<any[]>([])
   const [topProducts, setTopProducts] = useState<any[]>([])
   const [slowProducts, setSlowProducts] = useState<any[]>([])
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([])
 
   useEffect(() => {
-    Promise.all([fetchStats(), fetchLowStockItems(), fetchProductAnalytics()]).finally(() => setIsLoading(false))
+    Promise.all([fetchStats(), fetchLowStockItems(), fetchProductAnalytics(), fetchRecentTransactions()]).finally(() =>
+      setIsLoading(false),
+    )
   }, [])
 
   const fetchStats = async () => {
@@ -132,6 +135,31 @@ export default function Dashboard() {
     }
   }
 
+  const fetchRecentTransactions = async () => {
+    try {
+      const { data: transactions } = await supabase
+        .from("transactions")
+        .select(`
+          id,
+          total_amount,
+          profit,
+          created_at,
+          transaction_items (
+            quantity,
+            products (
+              name
+            )
+          )
+        `)
+        .order("created_at", { ascending: false })
+        .limit(10)
+
+      setRecentTransactions(transactions || [])
+    } catch (error) {
+      console.error("Error fetching recent transactions:", error)
+    }
+  }
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -147,6 +175,14 @@ export default function Dashboard() {
       return (num / 1000).toFixed(0) + "K"
     }
     return num.toString()
+  }
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString)
+    return {
+      date: date.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }),
+      time: date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+    }
   }
 
   if (isLoading) {
@@ -271,6 +307,80 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Transactions */}
+      {recentTransactions.length > 0 && (
+        <Card className="mb-6 bg-white/80 backdrop-blur-sm border-0 rounded-2xl shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-blue-100 rounded-xl">
+                <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h-3m6 0h3"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 text-sm">Riwayat Transaksi</h3>
+                <p className="text-gray-600 text-xs">10 transaksi terakhir</p>
+              </div>
+            </div>
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {recentTransactions.map((transaction, index) => {
+                const { date, time } = formatDateTime(transaction.created_at)
+                const totalItems =
+                  transaction.transaction_items?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0
+                const firstProduct = transaction.transaction_items?.[0]?.products?.name || "Produk tidak diketahui"
+                const moreItems =
+                  transaction.transaction_items?.length > 1
+                    ? ` +${transaction.transaction_items.length - 1} lainnya`
+                    : ""
+
+                return (
+                  <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="p-2 bg-emerald-100 rounded-lg flex-shrink-0">
+                        <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
+                            #{transaction.id.slice(-6).toUpperCase()}
+                          </span>
+                          <span className="text-xs text-gray-500">{totalItems} item</span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {firstProduct}
+                          {moreItems}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-500">{date}</span>
+                          <span className="text-xs text-gray-400">•</span>
+                          <span className="text-xs text-gray-500">{time}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <p className="text-sm font-bold text-emerald-600">{formatCurrency(transaction.total_amount)}</p>
+                      <p className="text-xs text-gray-500">Laba: {formatCurrency(transaction.profit)}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stock Alert */}
       {lowStockItems.length > 0 && (
